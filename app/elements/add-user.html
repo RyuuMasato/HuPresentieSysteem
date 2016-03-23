@@ -1,0 +1,47 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html" />
+<link rel="import" href="../../bower_components/paper-styles/paper-styles.html" />
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html" />
+<link rel="import" href="../../bower_components/firebase-element/firebase-collection.html" />
+<link rel="stylesheet" href="" />
+
+
+<dom-module id="add-user">
+    <template is="dom-bind">
+        <style>
+            paper-dialog {
+              padding: 20px;
+            }
+        </style>
+        <firebase-collection id="firebase" location="https://userbased.firebaseio.com/users"></firebase-collection>
+        <paper-dialog id="adduser">
+        <h2>Add user</h2>
+        <paper-dialog-scrollable>
+          <paper-input
+            id="input"
+            label="Name"
+            value="{{user.name}}"></paper-input>
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button dialog-dismiss>Cancel</paper-button>
+          <paper-button dialog-confirm on-tap="addUser">Accept</paper-button>
+        </div>
+        </paper-dialog>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'add-user',
+
+            properties: {
+              user: {
+                type: Object,
+                value: {}
+              },
+            },
+
+            addUser: function() {
+              this.$.firebase.add(this.user);
+            }
+        });
+    </script>
+</dom-module>

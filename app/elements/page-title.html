@@ -1,0 +1,54 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html" />
+<link rel="import" href="../../bower_components/paper-styles/paper-styles.html" />
+<link rel="import" href="../../bower_components/paper-button/paper-button.html" />
+<link rel="import" href="../../bower_components/paper-input/paper-input.html" />
+
+
+<dom-module id="page-title">
+    <template>
+        <style>
+            :host {
+                display: block;
+                background: var(--paper-blue-500);
+                padding: 20px;
+            }
+
+            .title {
+              @apply(--paper-font-display2);
+            }
+
+            .subtitle { @apply(--paper-font-headline); }
+
+            paper-button {
+              @apply(--paper-font-button);
+              background: var(--paper-orange-200);
+            }
+        </style>
+
+        <h1 class="title" elevation="1">{{title}}</h1>
+        <span class="subtitle">{{subTitle}}</span>
+        <!--<paper-input value="{{input}}"></paper-input>
+
+        <paper-button raised on-tap="setTitle">{{buttonTitle}}</paper-button>-->
+    </template>
+
+    <script>
+        Polymer({
+            is: 'page-title',
+
+            properties: {
+              title: String,
+              subTitle: String,
+              buttonTitle: {
+                type: String,
+                value: 'Set Page Title'
+              }
+            },
+
+            setTitle: function() {
+              this.title = this.input;
+              this.input = '';
+            }
+        });
+    </script>
+</dom-module>

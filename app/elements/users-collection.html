@@ -1,0 +1,169 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html" />
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html" />
+<link rel="import" href="../../bower_components/iron-icons/maps-icons.html">
+<link rel="import" href="../../bower_components/paper-styles/paper-styles.html" />
+<link rel="import" href="../../bower_components/firebase-element/firebase-collection.html" />
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html" />
+<link rel="import" href="../../bower_components/paper-card/paper-card.html" />
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html" />
+<link rel="import" href="../../bower_components/paper-menu/paper-menu.html" />
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html" />
+<link rel="import" href="../../bower_components/paper-input/paper-input.html" />
+<link rel="import" href="../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html" />
+<link rel="import" href="user-item.html" />
+
+
+<dom-module id="users-collection">
+    <style>
+      :host {
+        display: inline-block;
+        width: 100%;
+        white-space: normal;
+      }
+      paper-card {
+        width: 100%;
+        padding: 20px;
+      }
+      paper-fab {
+        margin: 10px;
+      }
+      .bold {
+        font-weight: 600;
+      }
+      .line-left {
+        display: inline-block;
+        float: left;
+      }
+      .line-right {
+        display: inline-block;
+        float: right;
+        padding-left: 10px;
+      }
+    </style>
+    <template>
+      <firebase-collection
+        id="firebase"
+        location="https://userbased.firebaseio.com/users"
+        data="{{data}}">
+      </firebase-collection>
+
+      <paper-card>
+          <div class="line-left">
+              <paper-input id="newUser" label="H.U. account" placeholder="voornaam.achternaam" invalid="{{newUserValidated}}" value="{{email::input}}" on-blur="_validateEmail">
+                <iron-icon icon="mail" prefix></iron-icon>
+              </paper-input>
+          </div>
+          <div class="line-left">
+            <iron-icon icon="user" prefix></iron-icon>
+            <paper-dropdown-menu label="Domein" suffix>
+              <paper-menu class="dropdown-content" selected="{{keySuffix}}" >
+                <paper-item label="student.hu.nl">@student.hu.nl</paper-item>
+                <paper-item label="hu.nl">@hu.nl</paper-item>
+              </paper-menu>
+            </paper-dropdown-menu>
+          </div>
+
+        <div class="line-right">
+          <paper-fab icon="add" title="Add" on-tap="_updateNewUser" disabled="{{addButton}}"></paper-fab>
+        </div>
+      </paper-card>
+
+      <template is="dom-repeat" items="{{data}}" as="user">
+        <user-item item="{{user}}"></user-item>
+      </template>
+
+      <div>{{noEntryMessage}}</div>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'users-collection',
+
+            properties: {
+              data: {
+                type: Object,
+                observer: '_validateDataBase'
+              },
+              newUser: {
+                type: Object,
+                value: function() { return {}; }
+              },
+              email:  {
+                type: String,
+                value: '',
+                observer: '_validateEmail'
+              },
+              keySuffix: {
+                value: 0,
+                notify: true,
+                observer: '_setUserType'
+              },
+              nextId: {
+                type: Number,
+                value: 1
+              },
+              newUserValidated: {
+                type: Boolean,
+                value: false,
+                observer: '_toggleAddButton'
+              },
+              addButton: {
+                type: Boolean,
+                value: true
+              },
+              noEntryMessage: {
+                type: String,
+                value: 'Er zijn nog geen gebruikers toegevoegd.'
+              }
+            },
+
+            _validateDataBase: function() {
+              this.noEntryMessage = '';
+            },
+
+            _validateEmail: function() {
+              if(!new RegExp("^[a-z]{1,}[\.]{1}[a-z]{1,}$").test(this.email)) {
+                this.newUserValidated = true;
+              } else {
+                this.$.newUser.errorMessage = '"lorem.ipsum"(@dorom.ips)';
+                this.newUserValidated = false;
+              }
+            },
+
+            _toggleAddButton: function() {
+              this.addButton = !this.addButton;
+            },
+
+            _updateNewUser: function() {
+              this.setNextId();
+              this._setUserType();
+              this.set('newUser.firstName', `${this.capitalize(this.email.split(".")[0], 'capFirst')}`);
+              this.set('newUser.lastName', `${this.capitalize(this.email.split(".")[1], 'capFirst')}`);
+              this.set('newUser.email', `${this.email}` + `${this.emailSuffix}`);
+              this.set('newUser.userType', `${this.userType}`);
+              this.$.firebase.add(this.newUser);
+              console.log(this.newUser);
+             },
+
+             _setUserType: function() {
+              if(this.keySuffix == 1) {
+                this.userType = 'Docent';
+                this.emailSuffix = '@hu.nl';
+              } else {
+                this.userType = 'Student';
+                this.emailSuffix = '@student.hu.nl';
+              }
+            },
+
+            setNextId: function() {
+              this.data.forEach(Object => { this.nextId++; });
+              this.newUser.__firebaseKey__ = this.nextId;
+              console.log(this.newUser.__firebaseKey__);
+            },
+
+            capitalize: function(string, mode) {
+              if(mode === 'capFirst') return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+        });
+    </script>
+</dom-module>
